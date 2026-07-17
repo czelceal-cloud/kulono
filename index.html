@@ -1,310 +1,228 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#020208">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kulono · cosmic maze</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap');
-:root{
-  --ku:#b43214;--ku2:#d4461a;--gold:#d4a853;--blue:#5b9bd5;
-  --bg:#020208;--t1:#f5f5f7;--t2:#98989d;--t3:#636366;
-  --panel:rgba(18,14,16,.72);--sep:rgba(255,255,255,.08);
-  --blur:blur(22px) saturate(1.2);
-  --font:"Inter",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
-  --brand-grad:linear-gradient(115deg,#fff5eb 0%,#f0a070 22%,#e07040 48%,#e0b060 76%,#f0d090 100%);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:var(--font);-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--t1);overflow:hidden}
-body{position:fixed;inset:0;width:100%}
-button{font:inherit;border:0;background:0;color:inherit;cursor:pointer}
-#c{position:fixed;inset:0;display:block;width:100%;height:100%}
-#loading{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#020208;color:var(--t2);font-size:14px;transition:opacity .8s}
-#loading .bar{width:40px;height:2px;border-radius:2px;background:linear-gradient(90deg,#b43214,#d4a853);background-size:200%;animation:lp 1.5s ease infinite}
-@keyframes lp{50%{background-position:100%}}
-.loaded #loading{opacity:0;pointer-events:none}
-.hud{position:fixed;top:calc(16px + env(safe-area-inset-top,0));left:50%;transform:translateX(-50%);z-index:10;display:flex;align-items:center;gap:12px;padding:10px 22px;border-radius:999px;background:var(--panel);backdrop-filter:var(--blur);border:.5px solid var(--sep);transition:opacity .4s,transform .4s}
-.hud.hide{opacity:0;transform:translateX(-50%) translateY(-12px);pointer-events:none}
-.logo{font-weight:700;font-size:15px;background:var(--brand-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.hud .s{width:1px;height:18px;background:var(--sep)}
-.hud .i{font-size:13px;color:var(--t2)}
-.ins{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%);z-index:10;padding:12px 24px;border-radius:999px;background:var(--panel);backdrop-filter:var(--blur);border:.5px solid var(--sep);font-size:14px;font-weight:500;color:var(--t2);transition:opacity .5s,transform .5s;pointer-events:none;white-space:nowrap}
-.ins.hide{opacity:0;transform:translateX(-50%) translateY(16px)}
-.ch{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;width:20px;height:20px;pointer-events:none;display:none}
-.ch.on{display:block}
-.ch::before,.ch::after{content:'';position:absolute;background:rgba(255,255,255,.2)}
-.ch::before{top:50%;left:0;width:100%;height:1px;transform:translateY(-50%)}
-.ch::after{left:50%;top:0;height:100%;width:1px;transform:translateX(-50%)}
-.mh{position:fixed;top:calc(16px + env(safe-area-inset-top,0));left:50%;transform:translateX(-50%);z-index:10;display:none;align-items:center;gap:16px;padding:10px 22px;border-radius:999px;background:var(--panel);backdrop-filter:var(--blur);border:.5px solid var(--sep)}
-.mh.on{display:flex}
-.mh .ms{font-size:12px;color:var(--t3)}
-.mh .eb{padding:6px 16px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(180,50,20,.2);color:var(--ku2)}
-.lb{position:fixed;top:50%;left:50%;z-index:6;pointer-events:none;font-size:13px;font-weight:600;padding:8px 16px;border-radius:12px;background:var(--panel);backdrop-filter:var(--blur);border:.5px solid var(--sep);color:var(--gold);transform:translate(-50%,-60px);opacity:0;transition:opacity .25s;white-space:nowrap}
-.lb.on{opacity:1}
-@media(max-width:480px){.hud{padding:8px 14px;font-size:13px}.ins{font-size:12px;padding:10px 16px;white-space:normal}}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#020208;color:#f5f5f7;font-family:-apple-system,system-ui,sans-serif}
+body{position:fixed;inset:0}
+canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
+#load{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#020208;color:#98989d;font-size:14px;transition:opacity .8s}
+#load.hide{opacity:0;pointer-events:none}
+#load .e{color:#ff3b30;font-size:28px}
+#load .t{font-size:15px;font-weight:500;color:#f5f5f7}
+#hud{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:10;padding:8px 18px;border-radius:999px;background:rgba(18,14,16,.72);backdrop-filter:blur(22px);border:.5px solid rgba(255,255,255,.08);font-size:13px;display:flex;align-items:center;gap:10px;transition:opacity .4s}
+#hud .l{font-weight:700;background:linear-gradient(115deg,#fff5eb,#e07040,#e0b060,#f0d090);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#hud.hide{opacity:0}
+#ins{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10;padding:10px 20px;border-radius:999px;background:rgba(18,14,16,.72);backdrop-filter:blur(22px);border:.5px solid rgba(255,255,255,.08);font-size:13px;color:#98989d;transition:opacity .4s;pointer-events:none;white-space:nowrap}
+#ins.hide{opacity:0}
+#lb{position:fixed;top:calc(50% - 40px);left:50%;transform:translate(-50%);z-index:6;padding:8px 16px;border-radius:12px;background:rgba(18,14,16,.72);backdrop-filter:blur(22px);border:.5px solid rgba(255,255,255,.08);font-size:13px;font-weight:600;color:#d4a853;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+#lb.on{opacity:1}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="loading"><div class="bar"></div><span>Loading cosmic maze…</span></div>
-<div class="hud" id="hud"><span class="logo">KULONO</span><span class="s"></span><span class="i">cosmic maze</span></div>
-<div class="ins" id="ins">✦ Click a maze to enter · Drag to explore</div>
-<div class="lb" id="lb"></div>
-<div class="ch" id="ch"></div>
-<div class="mh" id="mh"><span class="ms" id="ms">🌐 exploring</span><button class="eb" id="eb">✕ exit maze</button></div>
+<div id="load"><div class="b" style="width:40px;height:2px;border-radius:2px;background:linear-gradient(90deg,#b43214,#d4a853);animation:lp 1.5s ease infinite"></div><span>Loading…</span></div>
+<style>@keyframes lp{50%{background-position:100%}}</style>
+<div id="hud"><span class="l">KULONO</span><span style="width:1px;height:16px;background:rgba(255,255,255,.08)"></span><span>cosmic maze</span></div>
+<div id="ins">✦ Click a maze to enter · Drag to explore</div>
+<div id="lb"></div>
 
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-/* Kulono · Cosmic Maze — single file 3D experience */
-(function(){
-'use strict';
+// Fallback if Three.js fails to load
+if(typeof THREE==='undefined'){
+  document.getElementById('load').innerHTML=
+    '<div class="e">⚠</div><div class="t">Failed to load 3D engine</div><div style="font-size:12px;color:#98989d;max-width:300px;text-align:center;margin-top:4px">Please open this page in Chrome/Safari/Firefox on desktop or mobile.</div>';
+  throw new Error('THREE not loaded');
+}
 
-const $=id=>document.getElementById(id);
-const c=$('c'),renderer=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});
-renderer.setSize(window.innerWidth,window.innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.0;
+// OrbitControls for r128 (simplified standalone)
+THREE.OrbitControls=function(camera,domElement){
+  var scope=this,STATE={NONE:-1,ROTATE:0,DOLLY:1,PAN:2},state=STATE.NONE;
+  this.target=new THREE.Vector3();this.enableDamping=false;this.dampingFactor=.05;
+  this.minDistance=0;this.maxDistance=Infinity;this.maxPolarAngle=Math.PI;
+  this.enabled=true;
+  var sp=new THREE.Vector3(),se=new THREE.Spherical(),sd=new THREE.Spherical();
+  var panOffset=new THREE.Vector3(),rotateStart=new THREE.Vector2();
+  var rotateEnd=new THREE.Vector2(),rotateDelta=new THREE.Vector2();
+  var dollyStart=new THREE.Vector2(),dollyEnd=new THREE.Vector2(),dollyDelta=new THREE.Vector2();
+  function getZoomScale(){return Math.pow(.95,1.5)}
+  function rotateLeft(a){se.theta-=a}function rotateUp(a){se.phi-=a}
+  function panLeft(d,mm){var r=new THREE.Matrix4().makeRotationY(se.theta);var v=new THREE.Vector3(d.x,0,d.y).applyMatrix4(r);panOffset.add(v)}
+  function panUp(d,mm){var r=new THREE.Matrix4().makeRotationY(se.theta);var v=new THREE.Vector3(0,d.y,0).applyMatrix4(r);panOffset.add(v)}
+  function pan(d,mm){panLeft(d.x,mm);panUp(d.y,mm)}
+  this.update=function(){
+    var offset=new THREE.Vector3();offset.copy(camera.position).sub(this.target);
+    se.setFromVector3(offset);
+    if(this.enableDamping){se.theta+=sd.theta*this.dampingFactor;se.phi+=sd.phi*this.dampingFactor;sd.set(0,0,0)}
+    se.theta=Math.max(0,Math.min(2*Math.PI,se.theta));se.phi=Math.max(.01,Math.min(this.maxPolarAngle,se.phi));
+    se.makeSafe();offset.setFromSpherical(se);camera.position.copy(this.target).add(offset);camera.lookAt(this.target);
+    if(this.enableDamping&&sd.theta!==0||sd.phi!==0){scope.dispatchEvent({type:'change'})}
+  };
+  function onMouseDown(e){if(!scope.enabled)return;e.preventDefault();
+    state=e.button===0?STATE.ROTATE:e.button===1?STATE.DOLLY:STATE.PAN;
+    rotateStart.set(e.clientX,e.clientY)
+  }
+  function onMouseMove(e){if(!scope.enabled||state===STATE.NONE)return;e.preventDefault();
+    rotateEnd.set(e.clientX,e.clientY);rotateDelta.subVectors(rotateEnd,rotateStart);
+    if(state===STATE.ROTATE){rotateLeft(2*Math.PI*rotateDelta.x/domElement.clientHeight);rotateUp(2*Math.PI*rotateDelta.y/domElement.clientHeight)}
+    rotateStart.copy(rotateEnd);scope.update()
+  }
+  function onMouseUp(){state=STATE.NONE}
+  function onWheel(e){if(!scope.enabled||e.deltaY===0)return;e.preventDefault();
+    var s=getZoomScale();var d=1-s;if(e.deltaY>0)d=1/s;
+    camera.position.copy(camera.position).multiplyScalar(d);scope.update()
+  }
+  domElement.addEventListener('contextmenu',function(e){e.preventDefault()},false);
+  domElement.addEventListener('mousedown',onMouseDown,false);domElement.addEventListener('mousemove',onMouseMove,false);
+  domElement.addEventListener('mouseup',onMouseUp,false);domElement.addEventListener('mouseleave',onMouseUp,false);
+  domElement.addEventListener('wheel',onWheel,{passive:false});this.update();
+};
+THREE.OrbitControls.prototype=Object.create(THREE.EventDispatcher.prototype);
 
-const scene=new THREE.Scene();
-scene.fog=new THREE.FogExp2(0x020208,.004);
-const camera=new THREE.PerspectiveCamera(55,window.innerWidth/window.innerHeight,.1,200);
+// ✅ Hide loading
+document.getElementById('load').classList.add('hide');
+
+// === Build scene ===
+var c=document.getElementById('c');
+var renderer=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});
+renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1;
+
+var scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x020208,.004);
+var camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,200);
 camera.position.set(0,5,18);
-const controls=new THREE.OrbitControls(camera,renderer.domElement);
+var controls=new THREE.OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true;controls.dampingFactor=.08;
-controls.minDistance=4;controls.maxDistance=40;
-controls.maxPolarAngle=Math.PI/2.1;
-controls.target.set(0,0,0);
+controls.minDistance=4;controls.maxDistance=40;controls.maxPolarAngle=Math.PI/2.1;
 
-// Lights
 scene.add(new THREE.AmbientLight(0x222244,.6));
-const ml=new THREE.DirectionalLight(0x8888ff,1.5);ml.position.set(-8,12,-4);scene.add(ml);
-const wl=new THREE.DirectionalLight(0xff8844,.8);wl.position.set(6,3,8);scene.add(wl);
-const rl=new THREE.DirectionalLight(0x4488ff,.4);rl.position.set(-4,-6,10);scene.add(rl);
+var ml=new THREE.DirectionalLight(0x8888ff,1.5);ml.position.set(-8,12,-4);scene.add(ml);
+var wl=new THREE.DirectionalLight(0xff8844,.8);wl.position.set(6,3,8);scene.add(wl);
+scene.add((new THREE.DirectionalLight(0x4488ff,.4)).position.set(-4,-6,10));
 
 // Stars
-const sc=3000,sp=new Float32Array(sc*3);
-for(let i=0;i<sc;i++){const r=30+Math.random()*80,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
-  sp[i*3]=r*Math.sin(ph)*Math.cos(th);sp[i*3+1]=r*Math.cos(ph);sp[i*3+2]=r*Math.sin(ph)*Math.sin(th)}
-const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(sp,3));
-const sm=new THREE.PointsMaterial({color:0xaabbff,size:.25,transparent:true,opacity:.8,sizeAttenuation:true});
-const stars=new THREE.Points(sg,sm);scene.add(stars);
+var N=3000,pos=[];for(var i=0;i<N*3;i++){var r=30+Math.random()*80,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
+  pos[i]=r*Math.sin(ph)*Math.cos(th);pos[++i]=r*Math.cos(ph);pos[++i]=r*Math.sin(ph)*Math.sin(th)}
+var sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(pos),3));
+scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xaabbff,size:.25,transparent:true,opacity:.8,sizeAttenuation:true})));
 
-// Nebula sprites
-function mkNeb(c,pos,sz){
-  const cv=document.createElement('canvas');cv.width=cv.height=64;
-  const cx=cv.getContext('2d');const g=cx.createRadialGradient(32,32,0,32,32,32);
-  g.addColorStop(0,`rgba(${(c>>16)&255},${(c>>8)&255},${c&255},1)`);
-  g.addColorStop(.3,`rgba(${(c>>16)&255},${(c>>8)&255},${c&255},.5)`);
-  g.addColorStop(1,`rgba(${(c>>16)&255},${(c>>8)&255},${c&255},0)`);
+// Nebula
+function neb(c2,p,s2){
+  var cv=document.createElement('canvas');cv.width=cv.height=64;
+  var cx=cv.getContext('2d');var g=cx.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,'rgba('+((c2>>16)&255)+','+((c2>>8)&255)+','+(c2&255)+',1)');
+  g.addColorStop(.3,'rgba('+((c2>>16)&255)+','+((c2>>8)&255)+','+(c2&255)+',.5)');
+  g.addColorStop(1,'rgba('+((c2>>16)&255)+','+((c2>>8)&255)+','+(c2&255)+',0)');
   cx.fillStyle=g;cx.fillRect(0,0,64,64);
-  const tx=new THREE.CanvasTexture(cv);
-  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,blending:THREE.AdditiveBlending,transparent:true,opacity:.12,depthWrite:false}));
-  s.position.set(pos[0],pos[1],pos[2]);s.scale.set(sz,sz,1);scene.add(s);
+  var sp2=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),blending:THREE.AdditiveBlending,transparent:true,opacity:.12,depthWrite:false}));
+  sp2.position.set(p[0],p[1],p[2]);sp2.scale.set(s2,s2,1);scene.add(sp2);
 }
-mkNeb(0xb43214,[-20,5,-25],35);mkNeb(0x5b9bd5,[18,-3,-30],40);mkNeb(0xd4a853,[-8,12,-35],30);
+neb(0xb43214,[-20,5,-25],35);neb(0x5b9bd5,[18,-3,-30],40);neb(0xd4a853,[-8,12,-35],30);
 
 // Maze generator
-function genMaze(c,r){
-  const g=[];for(let y=0;y<r;y++){g[y]=[];for(let x=0;x<c;x++)g[y][x]={x,y,v:false,w:{n:true,s:true,e:true,w:true}}}
-  const st=[];let cu=g[0][0];cu.v=true;
-  const dd=[{dy:-1,dx:0,w:'n',o:'s'},{dy:1,dx:0,w:'s',o:'n'},{dy:0,dx:1,w:'e',o:'w'},{dy:0,dx:-1,w:'w',o:'e'}];
-  while(true){
-    const nb=[];dd.forEach(d=>{const ny=cu.y+d.dy,nx=cu.x+d.dx;if(ny>=0&&ny<r&&nx>=0&&nx<c&&!g[ny][nx].v)nb.push({ny,nx,w:d.w,o:d.o})});
-    if(nb.length){const n=nb[Math.floor(Math.random()*nb.length)];cu.w[n.w]=false;g[n.ny][n.nx].w[n.o]=false;g[n.ny][n.nx].v=true;st.push(cu);cu=g[n.ny][n.nx]}
+function genMaze(c2,r2){
+  var g2=[];for(var y=0;y<r2;y++){g2[y]=[];for(var x=0;x<c2;x++)g2[y][x]={x:x,y:y,v:false,w:{n:1,s:1,e:1,w:1}}}
+  var st=[];var cu=g2[0][0];cu.v=1;
+  var dd=[{dy:-1,dx:0,w:'n',o:'s'},{dy:1,dx:0,w:'s',o:'n'},{dy:0,dx:1,w:'e',o:'w'},{dy:0,dx:-1,w:'w',o:'e'}];
+  while(1){
+    var nb=[];dd.forEach(function(d){var ny=cu.y+d.dy,nx=cu.x+d.dx;if(ny>=0&&ny<r2&&nx>=0&&nx<c2&&!g2[ny][nx].v)nb.push({ny:ny,nx:nx,w:d.w,o:d.o})});
+    if(nb.length){var n=nb[Math.floor(Math.random()*nb.length)];cu.w[n.w]=0;g2[n.ny][n.nx].w[n.o]=0;g2[n.ny][n.nx].v=1;st.push(cu);cu=g2[n.ny][n.nx]}
     else if(st.length)cu=st.pop();else break;
-  }return g;
+  }return g2;
 }
 
 function buildMaze(grid,cs,wh,wt,color){
-  const r=grid.length,c=grid[0].length,hw=c*cs/2,hd=r*cs/2;
-  const g=new THREE.Group();
-  const mat=new THREE.MeshPhysicalMaterial({color,metalness:.4,roughness:.35,clearcoat:.3,transparent:true,opacity:.92});
-  const fm=new THREE.MeshPhysicalMaterial({color:0x1a1a2e,metalness:.1,roughness:.6,transparent:true,opacity:.5,side:THREE.DoubleSide});
-  const fl=new THREE.Mesh(new THREE.PlaneGeometry(c*cs,r*cs),fm);
-  fl.rotation.x=-Math.PI/2;fl.position.y=-wh/2;g.add(fl);
-  const cm=new THREE.MeshPhysicalMaterial({color:0x222244,metalness:.05,roughness:.8,transparent:true,opacity:.15,side:THREE.DoubleSide});
-  const cl=new THREE.Mesh(new THREE.PlaneGeometry(c*cs,r*cs),cm);
-  cl.rotation.x=Math.PI/2;cl.position.y=wh/2;g.add(cl);
-  for(let y=0;y<r;y++)for(let x=0;x<c;x++){
-    const cel=grid[y][x],px=(x-c/2)*cs+cs/2,pz=(y-r/2)*cs+cs/2;
-    if(cel.w.n){const w=new THREE.Mesh(new THREE.BoxGeometry(cs,wh,wt),mat);w.position.set(px,0,pz-cs/2);g.add(w)}
-    if(cel.w.s){const w=new THREE.Mesh(new THREE.BoxGeometry(cs,wh,wt),mat);w.position.set(px,0,pz+cs/2);g.add(w)}
-    if(cel.w.e){const w=new THREE.Mesh(new THREE.BoxGeometry(wt,wh,cs),mat);w.position.set(px+cs/2,0,pz);g.add(w)}
-    if(cel.w.w){const w=new THREE.Mesh(new THREE.BoxGeometry(wt,wh,cs),mat);w.position.set(px-cs/2,0,pz);g.add(w)}
-  }return g;
+  var r2=grid.length,c2=grid[0].length;var g2=new THREE.Group();
+  var mat=new THREE.MeshStandardMaterial({color:color,metalness:.4,roughness:.35});
+  var fm=new THREE.MeshStandardMaterial({color:0x1a1a2e,roughness:.6,side:THREE.DoubleSide,transparent:true,opacity:.5});
+  var fl=new THREE.Mesh(new THREE.PlaneGeometry(c2*cs,r2*cs),fm);
+  fl.rotation.x=-Math.PI/2;fl.position.y=-wh/2;g2.add(fl);
+  for(var y=0;y<r2;y++)for(var x=0;x<c2;x++){
+    var cel=grid[y][x],px=(x-c2/2)*cs+cs/2,pz=(y-r2/2)*cs+cs/2;
+    if(cel.w.n){var w2=new THREE.Mesh(new THREE.BoxGeometry(cs,wh,wt),mat);w2.position.set(px,0,pz-cs/2);g2.add(w2)}
+    if(cel.w.s){var w2=new THREE.Mesh(new THREE.BoxGeometry(cs,wh,wt),mat);w2.position.set(px,0,pz+cs/2);g2.add(w2)}
+    if(cel.w.e){var w2=new THREE.Mesh(new THREE.BoxGeometry(wt,wh,cs),mat);w2.position.set(px+cs/2,0,pz);g2.add(w2)}
+    if(cel.w.w){var w2=new THREE.Mesh(new THREE.BoxGeometry(wt,wh,cs),mat);w2.position.set(px-cs/2,0,pz);g2.add(w2)}
+  }return g2;
 }
 
-// Create floating mazes
-const mColors=[0xd4461a,0x5b9bd5,0xd4a853,0x34c759];
-const mDatas=[
-  {c:7,r:7,sz:.9,wh:1.6,pos:[-5,1.2,-3],rot:[.2,.4,0]},
-  {c:9,r:7,sz:.7,wh:1.3,pos:[5.5,.5,-4],rot:[-.1,-.3,.15]},
-  {c:6,r:8,sz:.85,wh:1.4,pos:[0,1.8,2],rot:[.3,-.2,-.1]},
-  {c:8,r:6,sz:.75,wh:1.2,pos:[-3.5,-.5,-8],rot:[.1,.5,.2]}
-];
-const mazes=[];
-mDatas.forEach((md,i)=>{
-  const grid=genMaze(md.c,md.r);
-  const mesh=buildMaze(grid,md.sz,md.wh,.12,mColors[i%mColors.length]);
-  mesh.position.set(md.pos[0],md.pos[1],md.pos[2]);
-  mesh.rotation.set(md.rot[0],md.rot[1],md.rot[2]);
-  mesh.userData={grid,cs:md.sz,wh:md.wh,c:md.c,r:md.r};
-  scene.add(mesh);mazes.push(mesh);
-  // Glow at entrance
-  const cv=document.createElement('canvas');cv.width=cv.height=64;
-  const cx=cv.getContext('2d');const g=cx.createRadialGradient(32,32,0,32,32,32);
-  const rc=[(mColors[i%mColors.length]>>16)&255,(mColors[i%mColors.length]>>8)&255,mColors[i%mColors.length]&255];
-  g.addColorStop(0,`rgba(${rc[0]},${rc[1]},${rc[2]},1)`);g.addColorStop(1,`rgba(${rc[0]},${rc[1]},${rc[2]},0)`);
-  cx.fillStyle=g;cx.fillRect(0,0,64,64);
-  const tx=new THREE.CanvasTexture(cv);
-  const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,blending:THREE.AdditiveBlending,transparent:true,opacity:.25,depthWrite:false}));
-  const sx=((0-md.c/2)*md.sz+md.sz/2),sz=((0-md.r/2)*md.sz+md.sz/2);
-  gl.position.set(md.pos[0]+sx,md.pos[1]+md.wh/2+.4,md.pos[2]+sz);gl.scale.set(1.6,1.6,1);
-  scene.add(gl);
+// Create mazes
+var mc=[0xd4461a,0x5b9bd5,0xd4a853,0x34c759];
+var mds=[{c:7,r:7,cs:.9,wh:1.6,p:[-5,1.2,-3],rt:[.2,.4,0]},{c:9,r:7,cs:.7,wh:1.3,p:[5.5,.5,-4],rt:[-.1,-.3,.15]},{c:6,r:8,cs:.85,wh:1.4,p:[0,1.8,2],rt:[.3,-.2,-.1]},{c:8,r:6,cs:.75,wh:1.2,p:[-3.5,-.5,-8],rt:[.1,.5,.2]}];
+var mazes=[];mds.forEach(function(d,i){
+  var g2=genMaze(d.c,d.r);var m=buildMaze(g2,d.cs,d.wh,.12,mc[i%mc.length]);
+  m.position.set(d.p[0],d.p[1],d.p[2]);m.rotation.set(d.rt[0],d.rt[1],d.rt[2]);
+  m.userData={grid:g2,cs:d.cs,wh:d.wh,c:d.c,r:d.r};scene.add(m);mazes.push(m);
+  // Glow sprite
+  var cv=document.createElement('canvas');cv.width=cv.height=64;var cx=cv.getContext('2d');
+  var rc=[(mc[i%mc.length]>>16)&255,(mc[i%mc.length]>>8)&255,mc[i%mc.length]&255];
+  var gr=cx.createRadialGradient(32,32,0,32,32,32);
+  gr.addColorStop(0,'rgba('+rc[0]+','+rc[1]+','+rc[2]+',1)');gr.addColorStop(1,'rgba('+rc[0]+','+rc[1]+','+rc[2]+',0)');
+  cx.fillStyle=gr;cx.fillRect(0,0,64,64);
+  var gl=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),blending:THREE.AdditiveBlending,transparent:true,opacity:.25,depthWrite:false}));
+  gl.position.set(d.p[0]+(0-d.c/2)*d.cs+d.cs/2,d.p[1]+d.wh/2+.4,d.p[2]+(0-d.r/2)*d.cs+d.cs/2);
+  gl.scale.set(1.6,1.6,1);scene.add(gl);
 });
 
-// Floating particle rings
-mDatas.forEach((md,i)=>{
-  const pc=60,pa=new Float32Array(pc*3);
-  for(let j=0;j<pc;j++){const a=j/pc*Math.PI*2,r=2+Math.random()*1.5;pa[j*3]=Math.cos(a)*r;pa[j*3+1]=(Math.random()-.5)*.5;pa[j*3+2]=Math.sin(a)*r}
-  const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pa,3));
-  const pm=new THREE.PointsMaterial({color:mColors[i%mColors.length],size:.06,transparent:true,opacity:.4,sizeAttenuation:true});
-  const pr=new THREE.Points(pg,pm);pr.position.copy(mazes[i].position);pr.userData={ph:Math.random()*6.28};
-  scene.add(pr);
-});
+// Click to enter maze (simplified - just orbit into it)
+var raycaster=new THREE.Raycaster(),ptr=new THREE.Vector2();
+var inMaze=false,$lb=document.getElementById('lb'),$ins=document.getElementById('ins'),$hud=document.getElementById('hud');
 
-// Interaction
-const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
-let hovered=null,inMaze=false,trans=false,player=null,pLocked=false;
-const $lb=$('lb'),$ins=$('ins'),$hud=$('hud'),$mh=$('mh'),$ch=$('ch'),$ms=$('ms');
-
-function getHits(e){
-  const r=renderer.domElement.getBoundingClientRect();
-  pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;
-  raycaster.setFromCamera(pointer,camera);
-  return raycaster.intersectObjects(mazes,true);
-}
-
-renderer.domElement.addEventListener('pointermove',e=>{
-  if(inMaze||trans)return;
-  const hits=getHits(e);
-  if(hits.length){
-    let o=hits[0].object;while(o.parent&&!mazes.includes(o))o=o.parent;
-    if(mazes.includes(o)||(o.parent&&mazes.includes(o.parent))){
-      const m=mazes.includes(o)?o:o.parent;
-      $lb.textContent='✦ '+m.userData.c+'×'+m.userData.r+' maze · click to enter';
-      $lb.classList.add('on');renderer.domElement.style.cursor='pointer';hovered=m;return;
-    }
+renderer.domElement.addEventListener('pointermove',function(e){
+  if(inMaze)return;
+  var r=renderer.domElement.getBoundingClientRect();
+  ptr.x=((e.clientX-r.left)/r.width)*2-1;ptr.y=-((e.clientY-r.top)/r.height)*2+1;
+  raycaster.setFromCamera(ptr,camera);
+  var h=raycaster.intersectObjects(mazes,true);
+  if(h.length){
+    var o=h[0].object;while(o.parent&&mazes.indexOf(o)<0)o=o.parent;
+    if(mazes.indexOf(o)>=0){$lb.textContent='✦ '+o.userData.c+'×'+o.userData.r+' maze · click';$lb.classList.add('on');renderer.domElement.style.cursor='pointer';return}
   }
-  $lb.classList.remove('on');renderer.domElement.style.cursor='default';hovered=null;
+  $lb.classList.remove('on');renderer.domElement.style.cursor='default';
 });
 
-renderer.domElement.addEventListener('click',e=>{
-  if(inMaze||trans)return;
-  if(document.pointerLockElement===renderer.domElement&&pLocked)return;
-  const hits=getHits(e);
-  if(hits.length){
-    let o=hits[0].object;while(o.parent&&!mazes.includes(o))o=o.parent;
-    if(mazes.includes(o)||(o.parent&&mazes.includes(o.parent))){
-      enterMaze(mazes.includes(o)?o:o.parent);
-    }
-  }
-});
-
-function enterMaze(maze){
-  inMaze=true;trans=true;const md=maze.userData;
-  $lb.classList.remove('on');$ins.classList.add('hide');$hud.classList.add('hide');
-  $mh.classList.add('on');$ch.classList.add('on');
-  controls.enabled=false;renderer.domElement.style.cursor='default';
-  const cx=((0-md.c/2)*md.cs+md.cs/2),cz=((0-md.r/2)*md.cs+md.cs/2);
-  const wp=new THREE.Vector3(maze.position.x+cx,maze.position.y+md.wh*.35,maze.position.z+cz+md.cs*.7);
-  const sp=camera.position.clone(),st=controls.target.clone();
-  const dur=1200,st2=performance.now();
-  const grid=maze.userData.grid;
-  player={pos:wp.clone(),yaw:0,pitch:0,grid,cs:md.cs,wh:md.wh,c:md.c,r:md.r,entered:Date.now()};
-
-  function t2(now){
-    const p2=Math.min(1,(now-st2)/dur),e2=1-Math.pow(1-p2,3);
+renderer.domElement.addEventListener('click',function(e){
+  if(inMaze)return;
+  var r=renderer.domElement.getBoundingClientRect();
+  ptr.x=((e.clientX-r.left)/r.width)*2-1;ptr.y=-((e.clientY-r.top)/r.height)*2+1;
+  raycaster.setFromCamera(ptr,camera);
+  var h=raycaster.intersectObjects(mazes,true);
+  if(!h.length)return;
+  var o=h[0].object;while(o.parent&&mazes.indexOf(o)<0)o=o.parent;
+  if(mazes.indexOf(o)<0)return;
+  inMaze=true;$lb.classList.remove('on');$ins.classList.add('hide');$hud.classList.add('hide');
+  var d=o.userData,cx=(0-d.c/2)*d.cs+d.cs/2,cz=(0-d.r/2)*d.cs+d.cs/2;
+  var wp=new THREE.Vector3(o.position.x+cx,o.position.y+d.wh*.35,o.position.z+cz+d.cs*.7);
+  var sp=camera.position.clone(),st=controls.target.clone(),t0=Date.now();
+  function anim2(){
+    var p2=Math.min(1,(Date.now()-t0)/1200),e2=1-Math.pow(1-p2,3);
     camera.position.lerpVectors(sp,wp,e2);controls.target.lerpVectors(st,wp,e2);
-    if(p2<1)requestAnimationFrame(t2);
-    else{trans=false;$ms.textContent='🧭 exploring '+md.c+'×'+md.r+' maze';renderer.domElement.requestPointerLock()}
+    if(p2<1)requestAnimationFrame(anim2);
   }
-  requestAnimationFrame(t2);
-}
-
-function exitMaze(){
-  if(!inMaze||trans)return;
-  trans=true;document.exitPointerLock();
-  const sp=camera.position.clone(),st=controls.target.clone(),dur=1000,st2=performance.now();
-  const ep=new THREE.Vector3(0,5,18),et=new THREE.Vector3(0,0,0);
-  function t2(now){
-    const p2=Math.min(1,(now-st2)/dur),e2=1-Math.pow(1-p2,3);
-    camera.position.lerpVectors(sp,ep,e2);controls.target.lerpVectors(st,et,e2);
-    if(p2<1)requestAnimationFrame(t2);
-    else{inMaze=false;trans=false;player=null;controls.enabled=true;
-      $ins.classList.remove('hide');$hud.classList.remove('hide');$mh.classList.remove('on');$ch.classList.remove('on');pLocked=false}
-  }
-  requestAnimationFrame(t2);
-}
-$('eb').addEventListener('click',exitMaze);
-
-// FPS
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&inMaze)exitMaze()});
-document.addEventListener('mousemove',e=>{
-  if(!inMaze||trans||!player||document.pointerLockElement!==renderer.domElement)return;
-  pLocked=true;player.yaw-=e.movementX*.002;player.pitch=Math.max(-.8,Math.min(.8,player.pitch-e.movementY*.002));
+  anim2();
 });
+// Exit on Escape
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&inMaze){
+  inMaze=false;$ins.classList.remove('hide');$hud.classList.remove('hide');
+  var sp=camera.position.clone(),t0=Date.now();
+  function anim2(){var p2=Math.min(1,(Date.now()-t0)/800),e2=1-Math.pow(1-p2,3);
+    camera.position.lerpVectors(sp,new THREE.Vector3(0,5,18),e2);controls.target.set(0,0,0);
+    if(p2<1)requestAnimationFrame(anim2)}
+  anim2()
+}});
 
-function moveP(){
-  if(!inMaze||trans||!player||document.pointerLockElement!==renderer.domElement)return;
-  const p=player;const fw=new THREE.Vector3(-Math.sin(p.yaw),0,-Math.cos(p.yaw));
-  const rt=new THREE.Vector3(Math.cos(p.yaw),0,-Math.sin(p.yaw));
-  const mv=new THREE.Vector3();
-  if(keys['w']||keys['arrowup'])mv.add(fw);if(keys['s']||keys['arrowdown'])mv.sub(fw);
-  if(keys['a']||keys['arrowleft'])mv.sub(rt);if(keys['d']||keys['arrowright'])mv.add(rt);
-  if(mv.length()>.01){
-    mv.normalize().multiplyScalar(.04);
-    const tp=p.pos.clone().add(mv);
-    // Simple bounds
-    const hw=p.c*p.cs/2-p.cs/2-.2,hd=p.r*p.cs/2-p.cs/2-.2;
-    tp.x=Math.max(-hw,Math.min(hw,tp.x));tp.z=Math.max(-hd,Math.min(hd,tp.z));
-    p.pos.copy(tp);
-    camera.position.copy(p.pos).add(new THREE.Vector3(0,.3,0));
-    const ld=new THREE.Vector3(-Math.sin(p.yaw)*Math.cos(p.pitch),Math.sin(p.pitch),-Math.cos(p.yaw)*Math.cos(p.pitch));
-    camera.lookAt(camera.position.clone().add(ld));controls.target.copy(p.pos);
-  }
-}
-const keys={};
-document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true});
-document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
-
-// Loaded
-document.getElementById('loading').classList.add('loaded');
-setTimeout(()=>document.getElementById('loading').style.display='none',800);
-
-// Animate
+// Animation loop
 function anim(t){
   requestAnimationFrame(anim);
-  const tt=t*.001;
-  mazes.forEach((m,i)=>{m.rotation.y+=.002*(.5+Math.sin(tt*.3+i)*.3);m.position.y+=Math.sin(tt*.4+i*1.2)*.0008});
-  stars.rotation.y+=.0001;
-  moveP();
-  controls.update();
-  renderer.render(scene,camera);
+  var tt=t*.001;
+  mazes.forEach(function(m,i){m.rotation.y+=.002*(.5+Math.sin(tt*.3+i)*.3);m.position.y+=Math.sin(tt*.4+i*1.2)*.0008});
+  controls.update();renderer.render(scene,camera);
 }
 anim();
-
-window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
-
-document.addEventListener('pointerlockchange',()=>{
-  if(document.pointerLockElement!==renderer.domElement&&inMaze&&!trans)$ms.textContent='🚪 click to re-enter';
-});
-
-console.log('🌌 Kulono Cosmic Maze loaded');
-})();
+addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script>
 </body>
 </html>
