@@ -142,7 +142,7 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stro
   </aside>
   <div class="main" id="main">
     <div class="top" id="top" hidden>
-      <div class="av" id="topAv">T</div>
+      <div class="av" id="topAv"></div>
       <div class="ti"><div class="n" id="topN">Agent</div><div class="s" id="topS">agent · isolated</div></div>
       <button class="ib press" id="closeBtn"><svg class="i" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
@@ -193,8 +193,9 @@ function renderList(){
     const id=esc(a.id),name=esc(a.name),type=esc(a.type);
     const active=S.cur&&String(S.cur.id)===String(a.id);
     const colors=(a.color||'[180,50,20]').replace(/[\[\]]/g,'');
+    const avId='av-'+id;
     return `<button class="item press ${active?'active':''}" data-id="${id}" onclick="APP.openAgent('${id}',this)">
-      <div class="av" style="background:radial-gradient(circle at 30% 30%,rgba(${colors},.6),rgba(${colors},.2))">${name[0].toUpperCase()}</div>
+      <div class="av" id="${avId}" data-av="${id}"></div>
       <div class="meta"><div class="n">${name}</div><div class="s">${type}${a.running?' · live':''}</div></div>
       <div class="dot ${a.running?'on':''}"></div>
     </button>`;
@@ -224,8 +225,8 @@ async function openAgent(id,btn){
   setThreadUI(true);
   markActive(id);
   closeSide();
-  $('topAv').style.background=`radial-gradient(circle at 30% 30%,rgba(${(agent.color||'[180,50,20]').replace(/[\[\]]/g,'')},.6),rgba(${(agent.color||'[180,50,20]').replace(/[\[\]]/g,'')},.2))`;
-  $('topAv').textContent=agent.name[0].toUpperCase();
+  $('topAv').setAttribute('data-av',agent.id);
+  APP.AV.set($('topAv'),agent.id,agent.name);
   $('topN').textContent=agent.name;
   $('topS').textContent=(agent.running?'Live · ':'')+agent.type+' · isolated';
   $('inp').placeholder='Message '+agent.name+'…';
@@ -288,9 +289,62 @@ resize();seed();
 addEventListener('resize',()=>{resize();seed()});
 requestAnimationFrame(draw);
 
+/* ── Particle Avatar system ── */
+const AV=(function(){
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const pal=[[180,50,20],[10,126,164],[47,107,58],[107,63,160],[196,92,18],[31,95,139],[138,46,74],[61,90,128],[91,155,213],[212,168,83]];
+  const nodes=new Map();let raf=0;
+  function hash(s){let h=2166136261>>>0;for(let i=0;i<(s||'').length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+  function color(seed){return pal[hash(String(seed||'x'))%pal.length]}
+  function ensure(el,seed,name){
+    if(!el||!el.isConnected)return;
+    let st=nodes.get(el);const rgb=color(seed);
+    if(!st){
+      el.innerHTML='';const c=document.createElement('canvas');c.style.pointerEvents='none';
+      const l=document.createElement('span');l.className='av-letter';l.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:rgba(255,255,255,.92);pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.25)';
+      el.style.position='relative';el.appendChild(c);el.appendChild(l);
+      st={canvas:c,letter:l,seed,name,rgb,parts:[],ph:Math.random()*6.28,size:0};nodes.set(el,st);
+    }
+    st.seed=seed;st.name=name;st.rgb=rgb;st.letter.textContent=(name||seed||'?')[0].toUpperCase();
+    const size=Math.max(28,Math.round(el.clientWidth||42));
+    if(st.size!==size){
+      st.size=size;const dpr=Math.min(devicePixelRatio||1,2);
+      st.canvas.width=size*dpr;st.canvas.height=size*dpr;st.canvas.style.cssText='display:block;width:100%;height:100%;pointer-events:none';
+      const ctx=st.canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);st.ctx=ctx;st.parts=[];
+      for(let i=0,n=Math.max(10,Math.floor(size/3.2));i<n;i++){const a=Math.random()*Math.PI*2;
+        st.parts.push({x:size/2+Math.cos(a)*size*.22,y:size/2+Math.sin(a)*size*.22,r:.8+Math.random()*1.8,a:a,rad:size*.12+Math.random()*size*.28,sp:.4+Math.random()*1.1,ph:Math.random()*6.28})}
+    }
+  }
+  function tick(now){const t=now*0.001;
+    nodes.forEach((st,el)=>{if(!el.isConnected){nodes.delete(el);return}
+      const size=Math.max(28,Math.round(el.clientWidth||42));
+      if(Math.abs(size-st.size)>1)ensure(el,st.seed,st.name);
+      const ctx=st.ctx;if(!ctx)return;const s=st.size,rgb=st.rgb;ctx.clearRect(0,0,s,s);
+      const g=ctx.createRadialGradient(s/2,s/2,s*.05,s/2,s/2,s*.52);
+      g.addColorStop(0,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},.55)`);g.addColorStop(.55,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},.22)`);g.addColorStop(1,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(s/2,s/2,s*.5,0,Math.PI*2);ctx.fill();
+      for(const p of st.parts){let x=p.x,y=p.y;
+        if(!reduce){const w=Math.sin(t*p.sp+p.ph)*1.4,w2=Math.cos(t*p.sp*.85+p.ph*1.3)*1.2;x=s/2+Math.cos(p.a+t*.18*p.sp)*p.rad+w;y=s/2+Math.sin(p.a+t*.18*p.sp)*p.rad+w2}
+        const alpha=.35+.35*Math.sin(t*p.sp+p.ph);
+        ctx.beginPath();ctx.arc(x,y,p.r*(.85+.25*Math.sin(t*p.sp+p.ph)),0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${Math.max(.15,alpha)})`;ctx.fill();
+        ctx.beginPath();ctx.arc(x,y,p.r*.55,0,Math.PI*2);ctx.fillStyle=`rgba(${rgb[0]},${rgb[1]},${rgb[2]},.85)`;ctx.fill()
+      }
+    });raf=requestAnimationFrame(tick)
+  }
+  raf=requestAnimationFrame(tick);
+  return {set:function(el,seed,name){ensure(el,seed,name)},clear:function(el){if(el)nodes.delete(el)}}
+})();
+
+/* Init particle avatars for all existing items */
+function initAvatars(){
+  document.querySelectorAll('[data-av]').forEach(el=>{
+    AV.set(el,el.getAttribute('data-av')||'',el.getAttribute('data-name')||'')
+  });
+}
+
 /* Boot */
 S.agents=MOCK_AGENTS;
-renderList();
+renderList();initAvatars();
 if(matchMedia('(max-width:860px)').matches)setTimeout(openSide,280);
 window.APP={openAgent};
 })();
