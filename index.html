@@ -24,14 +24,13 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// Guard
 if(typeof THREE==='undefined'){
   document.getElementById('load').innerHTML='<div style="color:#ff3b30;font-size:28px">&#9888;</div><div style="font-size:15px;font-weight:500">Failed to load 3D engine</div>';
   throw new Error('THREE not loaded');
 }
 document.getElementById('load').classList.add('hide');
 
-// === Minimal OrbitControls ===
+// === OrbitControls ===
 THREE.OrbitControls=function(cam,el){
   var s=this,st=THREE.NONE;
   this.target=new THREE.Vector3();
@@ -54,9 +53,9 @@ THREE.OrbitControls=function(cam,el){
   el.addEventListener('mouseleave',function(){st=THREE.NONE});
   el.addEventListener('wheel',function(e){e.preventDefault();
     if(!s.enabled||!e.deltaY)return;
-    var f=e.deltaY>0?1.1:.9;
     var d=cam.position.distanceTo(s.target);
-    var nd=f===1.1?d*1.1:d*.9;
+    var f=e.deltaY>0?1.1:.9;
+    var nd=d*f;
     if(nd<s.minDistance||nd>s.maxDistance)return;
     cam.position.sub(s.target).multiplyScalar(f).add(s.target);
     cam.lookAt(s.target);
@@ -74,32 +73,24 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 
 var scene=new THREE.Scene();
 var camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,200);
-camera.position.set(0,4,12);
+camera.position.set(0,5,14);
 
 var controls=new THREE.OrbitControls(camera,renderer.domElement);
-controls.target.set(0,0,0);
+controls.target.set(0,0.5,0);
 
-// Lights — bright and clear
+// Lights
 scene.add(new THREE.AmbientLight(0x404060,0.8));
 var dl=new THREE.DirectionalLight(0xffffff,2.0);
 dl.position.set(-5,12,-3);
 scene.add(dl);
 scene.add(new THREE.DirectionalLight(0xffaa88,1.2).position.set(6,2,8));
 
-// === TEST: red cube at origin ===
-var boxGeo=new THREE.BoxGeometry(1,1,1);
-var boxMat=new THREE.MeshStandardMaterial({color:0xff2200});
-var box=new THREE.Mesh(boxGeo,boxMat);
-box.position.set(0,0.5,0);
-scene.add(box);
-console.log('red box added');
-
-// === Floor grid for depth perception ===
+// Grid
 var gridHelper=new THREE.GridHelper(20,20,0x4466aa,0x334488);
 gridHelper.position.y=-0.5;
 scene.add(gridHelper);
 
-// === Stars ===
+// Stars
 (function(){
   var N=2000,pos=new Float32Array(N*3);
   for(var i=0;i<N;i++){
@@ -113,9 +104,58 @@ scene.add(gridHelper);
   scene.add(new THREE.Points(geo,new THREE.PointsMaterial({color:0x8899cc,size:.3,sizeAttenuation:true})));
 })();
 
-// === Animation ===
+// === MAZE ===
+function genMaze(cols,rows){
+  var g=[];
+  for(var y=0;y<rows;y++){g[y]=[];for(var x=0;x<cols;x++)g[y][x]={x:x,y:y,vis:0,n:1,s:1,e:1,w:1}}
+  var stack=[],cur=g[0][0];cur.vis=1;
+  while(true){
+    var next=[];
+    if(cur.y>0&&!g[cur.y-1][cur.x].vis)next.push({y:cur.y-1,x:cur.x,w:'n',o:'s'});
+    if(cur.y<rows-1&&!g[cur.y+1][cur.x].vis)next.push({y:cur.y+1,x:cur.x,w:'s',o:'n'});
+    if(cur.x<cols-1&&!g[cur.y][cur.x+1].vis)next.push({y:cur.y,x:cur.x+1,w:'e',o:'w'});
+    if(cur.x>0&&!g[cur.y][cur.x-1].vis)next.push({y:cur.y,x:cur.x-1,w:'w',o:'e'});
+    if(next.length){
+      var n=next[Math.floor(Math.random()*next.length)];
+      cur[n.w]=0;g[n.y][n.x][n.o]=0;g[n.y][n.x].vis=1;
+      stack.push(cur);cur=g[n.y][n.x];
+    }else if(stack.length){cur=stack.pop()}else break;
+  }
+  return g;
+}
+
+// Build a single test maze
+var cols=7,rows=7,cs=0.9,wh=1.4,wt=0.12;
+var grid=genMaze(cols,rows);
+var mazeGroup=new THREE.Group();
+var wallMat=new THREE.MeshStandardMaterial({color:0xd4461a,roughness:.5,metalness:.3});
+// Add floor
+var floorMat=new THREE.MeshStandardMaterial({color:0x1a1a2e,roughness:.7,side:THREE.DoubleSide,transparent:true,opacity:.35});
+var floorPlane=new THREE.Mesh(new THREE.PlaneGeometry(cols*cs,rows*cs),floorMat);
+floorPlane.rotation.x=-Math.PI/2;
+floorPlane.position.y=-wh/2;
+mazeGroup.add(floorPlane);
+
+// Add walls
+for(var y=0;y<rows;y++){
+  for(var x=0;x<cols;x++){
+    var cell=grid[y][x];
+    var px=(x-(cols-1)/2)*cs,pz=(y-(rows-1)/2)*cs;
+    if(cell.n){var w=new THREE.Mesh(new THREE.BoxGeometry(cs,wh,wt),wallMat);w.position.set(px,0,pz-cs/2);mazeGroup.add(w)}
+    if(cell.s){var w=new THREE.Mesh(new THREE.BoxGeometry(cs,wh,wt),wallMat);w.position.set(px,0,pz+cs/2);mazeGroup.add(w)}
+    if(cell.e){var w=new THREE.Mesh(new THREE.BoxGeometry(wt,wh,cs),wallMat);w.position.set(px+cs/2,0,pz);mazeGroup.add(w)}
+    if(cell.w){var w=new THREE.Mesh(new THREE.BoxGeometry(wt,wh,cs),wallMat);w.position.set(px-cs/2,0,pz);mazeGroup.add(w)}
+  }
+}
+
+mazeGroup.position.set(0,0.5,0);
+scene.add(mazeGroup);
+console.log('Maze added, children:',mazeGroup.children.length);
+
+// Animation
 (function anim(t){
   requestAnimationFrame(anim);
+  mazeGroup.rotation.y+=.002;
   controls.update();
   renderer.render(scene,camera);
 })();
