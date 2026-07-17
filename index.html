@@ -14,110 +14,55 @@
   --blur:blur(22px) saturate(1.2);
   --font:"Inter",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --brand-grad:linear-gradient(115deg,#fff5eb 0%,#f0a070 22%,#e07040 48%,#e0b060 76%,#f0d090 100%);
-  --spring:cubic-bezier(.32,.72,0,1);
-  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:var(--font);-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--t1);overflow:hidden}
-body{position:fixed;inset:0}
-button{font:inherit;border:0;background:0;color:inherit;cursor:pointer;touch-action:manipulation}
-#c{position:fixed;inset:0;display:block}
-
-/* Top HUD */
-.hud{
-  position:fixed;top:calc(16px + var(--st));left:50%;transform:translateX(-50%);z-index:10;
-  display:flex;align-items:center;gap:12px;
-  padding:10px 22px;border-radius:999px;
-  background:var(--panel);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  border:.5px solid var(--sep);
-  transition:opacity .4s,transform .4s var(--spring);
-}
-.hud.hidden{opacity:0;transform:translateX(-50%) translateY(-12px);pointer-events:none}
-.logo{font-weight:700;font-size:15px;letter-spacing:-.3px;background:var(--brand-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.hud .sep{width:1px;height:18px;background:var(--sep)}
-.hud-info{font-size:13px;color:var(--t2)}
-
-/* Bottom instruction */
-.ins{
-  position:fixed;bottom:calc(24px + var(--sb));left:50%;transform:translateX(-50%);z-index:10;
-  padding:12px 24px;border-radius:999px;text-align:center;
-  background:var(--panel);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  border:.5px solid var(--sep);font-size:14px;font-weight:500;color:var(--t2);
-  transition:opacity .5s,transform .5s var(--spring);
-  pointer-events:none;white-space:nowrap;
-}
-.ins.hidden{opacity:0;transform:translateX(-50%) translateY(16px)}
-
-/* In-maze HUD */
-.maze-hud{
-  position:fixed;top:calc(16px + var(--st));left:50%;transform:translateX(-50%);z-index:10;
-  display:none;align-items:center;gap:16px;
-  padding:10px 22px;border-radius:999px;
-  background:var(--panel);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  border:.5px solid var(--sep);
-}
-.maze-hud.on{display:flex}
-.maze-hud .exit-btn{padding:6px 16px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(180,50,20,.2);color:var(--ku2);border:.5px solid rgba(180,50,20,.3)}
-.maze-hud .exit-btn:hover{background:rgba(180,50,20,.3)}
-.maze-hud .stat{font-size:12px;color:var(--t3)}
-
-/* Crosshair */
-.ch{
-  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;
-  width:20px;height:20px;pointer-events:none;
-  display:none;
-}
+body{position:fixed;inset:0;width:100%}
+button{font:inherit;border:0;background:0;color:inherit;cursor:pointer}
+#c{position:fixed;inset:0;display:block;width:100%;height:100%}
+#loading{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#020208;color:var(--t2);font-size:14px;transition:opacity .8s}
+#loading .bar{width:40px;height:2px;border-radius:2px;background:linear-gradient(90deg,#b43214,#d4a853);background-size:200%;animation:lp 1.5s ease infinite}
+@keyframes lp{50%{background-position:100%}}
+.loaded #loading{opacity:0;pointer-events:none}
+.hud{position:fixed;top:calc(16px + env(safe-area-inset-top,0));left:50%;transform:translateX(-50%);z-index:10;display:flex;align-items:center;gap:12px;padding:10px 22px;border-radius:999px;background:var(--panel);backdrop-filter:var(--blur);border:.5px solid var(--sep);transition:opacity .4s,transform .4s}
+.hud.hide{opacity:0;transform:translateX(-50%) translateY(-12px);pointer-events:none}
+.logo{font-weight:700;font-size:15px;background:var(--brand-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hud .s{width:1px;height:18px;background:var(--sep)}
+.hud .i{font-size:13px;color:var(--t2)}
+.ins{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%);z-index:10;padding:12px 24px;border-radius:999px;background:var(--panel);backdrop-filter:var(--blur);border:.5px solid var(--sep);font-size:14px;font-weight:500;color:var(--t2);transition:opacity .5s,transform .5s;pointer-events:none;white-space:nowrap}
+.ins.hide{opacity:0;transform:translateX(-50%) translateY(16px)}
+.ch{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;width:20px;height:20px;pointer-events:none;display:none}
 .ch.on{display:block}
-.ch::before,.ch::after{
-  content:'';position:absolute;background:rgba(255,255,255,.25);
-}
+.ch::before,.ch::after{content:'';position:absolute;background:rgba(255,255,255,.2)}
 .ch::before{top:50%;left:0;width:100%;height:1px;transform:translateY(-50%)}
 .ch::after{left:50%;top:0;height:100%;width:1px;transform:translateX(-50%)}
-
-/* Hover label */
-.label{
-  position:fixed;top:50%;left:50%;z-index:6;pointer-events:none;
-  font-size:13px;font-weight:600;padding:8px 16px;border-radius:12px;
-  background:var(--panel);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  border:.5px solid var(--sep);color:var(--gold);
-  transform:translate(-50%,-60px);opacity:0;transition:opacity .25s;
-  white-space:nowrap;
-}
-.label.on{opacity:1}
-label .key{display:inline-block;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,.1);font-size:11px;margin:0 4px;color:var(--t2)}
-
+.mh{position:fixed;top:calc(16px + env(safe-area-inset-top,0));left:50%;transform:translateX(-50%);z-index:10;display:none;align-items:center;gap:16px;padding:10px 22px;border-radius:999px;background:var(--panel);backdrop-filter:var(--blur);border:.5px solid var(--sep)}
+.mh.on{display:flex}
+.mh .ms{font-size:12px;color:var(--t3)}
+.mh .eb{padding:6px 16px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(180,50,20,.2);color:var(--ku2)}
+.lb{position:fixed;top:50%;left:50%;z-index:6;pointer-events:none;font-size:13px;font-weight:600;padding:8px 16px;border-radius:12px;background:var(--panel);backdrop-filter:var(--blur);border:.5px solid var(--sep);color:var(--gold);transform:translate(-50%,-60px);opacity:0;transition:opacity .25s;white-space:nowrap}
+.lb.on{opacity:1}
 @media(max-width:480px){.hud{padding:8px 14px;font-size:13px}.ins{font-size:12px;padding:10px 16px;white-space:normal}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-
-<div class="hud" id="hud">
-  <span class="logo">KULONO</span>
-  <span class="sep"></span>
-  <span class="hud-info">cosmic maze</span>
-</div>
-
+<div id="loading"><div class="bar"></div><span>Loading cosmic maze…</span></div>
+<div class="hud" id="hud"><span class="logo">KULONO</span><span class="s"></span><span class="i">cosmic maze</span></div>
 <div class="ins" id="ins">✦ Click a maze to enter · Drag to explore</div>
-<div class="label" id="label"></div>
+<div class="lb" id="lb"></div>
 <div class="ch" id="ch"></div>
+<div class="mh" id="mh"><span class="ms" id="ms">🌐 exploring</span><button class="eb" id="eb">✕ exit maze</button></div>
 
-<div class="maze-hud" id="mazeHud">
-  <span class="stat" id="mazeStat">🌐 exploring</span>
-  <button class="exit-btn" id="exitBtn">✕ exit maze</button>
-</div>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* Kulono · Cosmic Maze — single file 3D experience */
+(function(){
+'use strict';
 
-<script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
-</script>
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-// ── Setup ──
-const c=document.getElementById('c');
-const renderer=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});
+const $=id=>document.getElementById(id);
+const c=$('c'),renderer=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});
 renderer.setSize(window.innerWidth,window.innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -125,490 +70,241 @@ renderer.toneMappingExposure=1.0;
 
 const scene=new THREE.Scene();
 scene.fog=new THREE.FogExp2(0x020208,.004);
-
 const camera=new THREE.PerspectiveCamera(55,window.innerWidth/window.innerHeight,.1,200);
 camera.position.set(0,5,18);
-
-const controls=new OrbitControls(camera,renderer.domElement);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true;controls.dampingFactor=.08;
 controls.minDistance=4;controls.maxDistance=40;
 controls.maxPolarAngle=Math.PI/2.1;
 controls.target.set(0,0,0);
 
-// ── Lights ──
-const ambient=new THREE.AmbientLight(0x222244,.6);
-scene.add(ambient);
-const moon=new THREE.DirectionalLight(0x8888ff,1.5);
-moon.position.set(-8,12,-4);scene.add(moon);
-const warm=new THREE.DirectionalLight(0xff8844,.8);
-warm.position.set(6,3,8);scene.add(warm);
-const rim=new THREE.DirectionalLight(0x4488ff,.4);
-rim.position.set(-4,-6,10);scene.add(rim);
+// Lights
+scene.add(new THREE.AmbientLight(0x222244,.6));
+const ml=new THREE.DirectionalLight(0x8888ff,1.5);ml.position.set(-8,12,-4);scene.add(ml);
+const wl=new THREE.DirectionalLight(0xff8844,.8);wl.position.set(6,3,8);scene.add(wl);
+const rl=new THREE.DirectionalLight(0x4488ff,.4);rl.position.set(-4,-6,10);scene.add(rl);
 
-// ── Starfield ──
-const starCount=3000;
-const starPos=new Float32Array(starCount*3);
-const starSizes=new Float32Array(starCount);
-for(let i=0;i<starCount;i++){
-  const r=30+Math.random()*80;
-  const theta=Math.random()*Math.PI*2;
-  const phi=Math.acos(2*Math.random()-1);
-  starPos[i*3]=r*Math.sin(phi)*Math.cos(theta);
-  starPos[i*3+1]=r*Math.cos(phi);
-  starPos[i*3+2]=r*Math.sin(phi)*Math.sin(theta);
-  starSizes[i]=.3+Math.random()*1.2;
-}
-const starGeo=new THREE.BufferGeometry();
-starGeo.setAttribute('position',new THREE.BufferAttribute(starPos,3));
-starGeo.setAttribute('size',new THREE.BufferAttribute(starSizes,1));
-const starMat=new THREE.PointsMaterial({color:0xaabbff,size:.25,transparent:true,opacity:.8,sizeAttenuation:true});
-const stars=new THREE.Points(starGeo,starMat);
-scene.add(stars);
+// Stars
+const sc=3000,sp=new Float32Array(sc*3);
+for(let i=0;i<sc;i++){const r=30+Math.random()*80,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
+  sp[i*3]=r*Math.sin(ph)*Math.cos(th);sp[i*3+1]=r*Math.cos(ph);sp[i*3+2]=r*Math.sin(ph)*Math.sin(th)}
+const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(sp,3));
+const sm=new THREE.PointsMaterial({color:0xaabbff,size:.25,transparent:true,opacity:.8,sizeAttenuation:true});
+const stars=new THREE.Points(sg,sm);scene.add(stars);
 
-// ── Nebula glows ──
-function addNebula(color,pos,size){
-  const g=new THREE.SpriteMaterial({
-    map:createGlowTexture(color),blending:THREE.AdditiveBlending,
-    transparent:true,opacity:.12,depthWrite:false
-  });
-  const s=new THREE.Sprite(g);s.position.set(pos[0],pos[1],pos[2]);s.scale.set(size,size,1);
-  scene.add(s);
+// Nebula sprites
+function mkNeb(c,pos,sz){
+  const cv=document.createElement('canvas');cv.width=cv.height=64;
+  const cx=cv.getContext('2d');const g=cx.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,`rgba(${(c>>16)&255},${(c>>8)&255},${c&255},1)`);
+  g.addColorStop(.3,`rgba(${(c>>16)&255},${(c>>8)&255},${c&255},.5)`);
+  g.addColorStop(1,`rgba(${(c>>16)&255},${(c>>8)&255},${c&255},0)`);
+  cx.fillStyle=g;cx.fillRect(0,0,64,64);
+  const tx=new THREE.CanvasTexture(cv);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,blending:THREE.AdditiveBlending,transparent:true,opacity:.12,depthWrite:false}));
+  s.position.set(pos[0],pos[1],pos[2]);s.scale.set(sz,sz,1);scene.add(s);
 }
-function createGlowTexture(hex){
-  const size=64;const c=document.createElement('canvas');c.width=c.height=size;
-  const ctx=c.getContext('2d');const g=ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
-  g.addColorStop(0,`rgba(${(hex>>16)&255},${(hex>>8)&255},${hex&255},1)`);
-  g.addColorStop(.3,`rgba(${(hex>>16)&255},${(hex>>8)&255},${hex&255},.5)`);
-  g.addColorStop(1,`rgba(${(hex>>16)&255},${(hex>>8)&255},${hex&255},0)`);
-  ctx.fillStyle=g;ctx.fillRect(0,0,size,size);
-  const tex=new THREE.CanvasTexture(c);
-  return tex;
-}
-addNebula(0xb43214,[-20,5,-25],35);
-addNebula(0x5b9bd5,[18,-3,-30],40);
-addNebula(0xd4a853,[-8,12,-35],30);
+mkNeb(0xb43214,[-20,5,-25],35);mkNeb(0x5b9bd5,[18,-3,-30],40);mkNeb(0xd4a853,[-8,12,-35],30);
 
-// ── Maze Generator ──
-function generateMaze(cols,rows){
-  const grid=[];
-  for(let r=0;r<rows;r++){grid[r]=[];for(let c=0;c<cols;c++)grid[r][c]={c,r,visited:false,walls:{n:true,s:true,e:true,w:true}}}
-  const stack=[];
-  let current=grid[0][0];current.visited=true;
-  const dirs=[{dr:-1,dc:0,w:'n',o:'s'},{dr:1,dc:0,w:'s',o:'n'},{dr:0,dc:1,w:'e',o:'w'},{dr:0,dc:-1,w:'w',o:'e'}];
+// Maze generator
+function genMaze(c,r){
+  const g=[];for(let y=0;y<r;y++){g[y]=[];for(let x=0;x<c;x++)g[y][x]={x,y,v:false,w:{n:true,s:true,e:true,w:true}}}
+  const st=[];let cu=g[0][0];cu.v=true;
+  const dd=[{dy:-1,dx:0,w:'n',o:'s'},{dy:1,dx:0,w:'s',o:'n'},{dy:0,dx:1,w:'e',o:'w'},{dy:0,dx:-1,w:'w',o:'e'}];
   while(true){
-    const neighbors=[];
-    dirs.forEach(d=>{
-      const nr=current.r+d.dr,nc=current.c+d.dc;
-      if(nr>=0&&nr<rows&&nc>=0&&nc<cols&&!grid[nr][nc].visited)
-        neighbors.push({nr,nc,wall:d.w,opp:d.o});
-    });
-    if(neighbors.length){
-      const next=neighbors[Math.floor(Math.random()*neighbors.length)];
-      current.walls[next.w]=false;
-      grid[next.nr][next.nc].walls[next.opp]=false;
-      grid[next.nr][next.nc].visited=true;
-      stack.push(current);current=grid[next.nr][next.nc];
-    }else if(stack.length){current=stack.pop()}
-    else break;
-  }
-  return grid;
+    const nb=[];dd.forEach(d=>{const ny=cu.y+d.dy,nx=cu.x+d.dx;if(ny>=0&&ny<r&&nx>=0&&nx<c&&!g[ny][nx].v)nb.push({ny,nx,w:d.w,o:d.o})});
+    if(nb.length){const n=nb[Math.floor(Math.random()*nb.length)];cu.w[n.w]=false;g[n.ny][n.nx].w[n.o]=false;g[n.ny][n.nx].v=true;st.push(cu);cu=g[n.ny][n.nx]}
+    else if(st.length)cu=st.pop();else break;
+  }return g;
 }
 
-function buildMazeMesh(grid,cellSize,wallHeight,wallThick,color){
-  const rows=grid.length,cols=grid[0].length;
-  const halfW=cols*cellSize/2,halfH=rows*cellSize/2;
-  const group=new THREE.Group();
-  const mat=new THREE.MeshPhysicalMaterial({
-    color,metalness:.4,roughness:.35,clearcoat:.3,
-    transparent:true,opacity:.92
-  });
-  const floorMat=new THREE.MeshPhysicalMaterial({
-    color:0x1a1a2e,metalness:.1,roughness:.6,transparent:true,opacity:.5,side:THREE.DoubleSide
-  });
-
-  // Floor
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(cols*cellSize,rows*cellSize),floorMat);
-  floor.rotation.x=-Math.PI/2;floor.position.y=-wallHeight/2;
-  group.add(floor);
-
-  // Ceiling glow
-  const ceilMat=new THREE.MeshPhysicalMaterial({
-    color:0x222244,metalness:.05,roughness:.8,transparent:true,opacity:.15,side:THREE.DoubleSide
-  });
-  const ceil=new THREE.Mesh(new THREE.PlaneGeometry(cols*cellSize,rows*cellSize),ceilMat);
-  ceil.rotation.x=Math.PI/2;ceil.position.y=wallHeight/2;
-  group.add(ceil);
-
-  // Walls
-  for(let r=0;r<rows;r++){
-    for(let c=0;c<cols;c++){
-      const cell=grid[r][c];
-      const cx=(c-cols/2)*cellSize+cellSize/2;
-      const cz=(r-rows/2)*cellSize+cellSize/2;
-      if(cell.walls.n){
-        const w=new THREE.Mesh(new THREE.BoxGeometry(cellSize,wallHeight,wallThick),mat);
-        w.position.set(cx,0,cz-cellSize/2);group.add(w);
-      }
-      if(cell.walls.s){
-        const w=new THREE.Mesh(new THREE.BoxGeometry(cellSize,wallHeight,wallThick),mat);
-        w.position.set(cx,0,cz+cellSize/2);group.add(w);
-      }
-      if(cell.walls.e){
-        const w=new THREE.Mesh(new THREE.BoxGeometry(wallThick,wallHeight,cellSize),mat);
-        w.position.set(cx+cellSize/2,0,cz);group.add(w);
-      }
-      if(cell.walls.w){
-        const w=new THREE.Mesh(new THREE.BoxGeometry(wallThick,wallHeight,cellSize),mat);
-        w.position.set(cx-cellSize/2,0,cz);group.add(w);
-      }
-    }
-  }
-  return group;
+function buildMaze(grid,cs,wh,wt,color){
+  const r=grid.length,c=grid[0].length,hw=c*cs/2,hd=r*cs/2;
+  const g=new THREE.Group();
+  const mat=new THREE.MeshPhysicalMaterial({color,metalness:.4,roughness:.35,clearcoat:.3,transparent:true,opacity:.92});
+  const fm=new THREE.MeshPhysicalMaterial({color:0x1a1a2e,metalness:.1,roughness:.6,transparent:true,opacity:.5,side:THREE.DoubleSide});
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(c*cs,r*cs),fm);
+  fl.rotation.x=-Math.PI/2;fl.position.y=-wh/2;g.add(fl);
+  const cm=new THREE.MeshPhysicalMaterial({color:0x222244,metalness:.05,roughness:.8,transparent:true,opacity:.15,side:THREE.DoubleSide});
+  const cl=new THREE.Mesh(new THREE.PlaneGeometry(c*cs,r*cs),cm);
+  cl.rotation.x=Math.PI/2;cl.position.y=wh/2;g.add(cl);
+  for(let y=0;y<r;y++)for(let x=0;x<c;x++){
+    const cel=grid[y][x],px=(x-c/2)*cs+cs/2,pz=(y-r/2)*cs+cs/2;
+    if(cel.w.n){const w=new THREE.Mesh(new THREE.BoxGeometry(cs,wh,wt),mat);w.position.set(px,0,pz-cs/2);g.add(w)}
+    if(cel.w.s){const w=new THREE.Mesh(new THREE.BoxGeometry(cs,wh,wt),mat);w.position.set(px,0,pz+cs/2);g.add(w)}
+    if(cel.w.e){const w=new THREE.Mesh(new THREE.BoxGeometry(wt,wh,cs),mat);w.position.set(px+cs/2,0,pz);g.add(w)}
+    if(cel.w.w){const w=new THREE.Mesh(new THREE.BoxGeometry(wt,wh,cs),mat);w.position.set(px-cs/2,0,pz);g.add(w)}
+  }return g;
 }
 
-// ── Create floating mazes ──
-const mazeColors=[0xd4461a,0x5b9bd5,0xd4a853,0x34c759];
-const mazeData=[
-  {cols:7,rows:7,size:.9,height:1.6,pos:[-5,1.2,-3],rot:[.2,.4,0]},
-  {cols:9,rows:7,size:.7,height:1.3,pos:[5.5,.5,-4],rot:[-.1,-.3,.15]},
-  {cols:6,rows:8,size:.85,height:1.4,pos:[0,1.8,2],rot:[.3,-.2,-.1]},
-  {cols:8,rows:6,size:.75,height:1.2,pos:[-3.5,-.5,-8],rot:[.1,.5,.2]}
+// Create floating mazes
+const mColors=[0xd4461a,0x5b9bd5,0xd4a853,0x34c759];
+const mDatas=[
+  {c:7,r:7,sz:.9,wh:1.6,pos:[-5,1.2,-3],rot:[.2,.4,0]},
+  {c:9,r:7,sz:.7,wh:1.3,pos:[5.5,.5,-4],rot:[-.1,-.3,.15]},
+  {c:6,r:8,sz:.85,wh:1.4,pos:[0,1.8,2],rot:[.3,-.2,-.1]},
+  {c:8,r:6,sz:.75,wh:1.2,pos:[-3.5,-.5,-8],rot:[.1,.5,.2]}
 ];
-
-const mazeGroups=[];
-mazeData.forEach((md,i)=>{
-  const grid=generateMaze(md.cols,md.rows);
-  const mesh=buildMazeMesh(grid,md.size,md.height,.12,mazeColors[i%mazeColors.length]);
+const mazes=[];
+mDatas.forEach((md,i)=>{
+  const grid=genMaze(md.c,md.r);
+  const mesh=buildMaze(grid,md.sz,md.wh,.12,mColors[i%mColors.length]);
   mesh.position.set(md.pos[0],md.pos[1],md.pos[2]);
   mesh.rotation.set(md.rot[0],md.rot[1],md.rot[2]);
-  mesh.userData={grid,cellSize:md.size,wallHeight:md.height,cols:md.cols,rows:md.rows,index:i};
-  scene.add(mesh);
-  mazeGroups.push(mesh);
-
-  // Entrance glow marker
-  const glowMat=new THREE.SpriteMaterial({
-    map:createGlowTexture(mazeColors[i%mazeColors.length]),
-    blending:THREE.AdditiveBlending,transparent:true,opacity:.25,depthWrite:false
-  });
-  const glow=new THREE.Sprite(glowMat);
-  const startX=((0-md.cols/2)*md.size+md.size/2);
-  const startZ=((0-md.rows/2)*md.size+md.size/2);
-  glow.position.set(md.pos[0]+startX,md.pos[1]+md.height/2+.4,md.pos[2]+startZ);
-  glow.scale.set(1.6,1.6,1);
-  scene.add(glow);
+  mesh.userData={grid,cs:md.sz,wh:md.wh,c:md.c,r:md.r};
+  scene.add(mesh);mazes.push(mesh);
+  // Glow at entrance
+  const cv=document.createElement('canvas');cv.width=cv.height=64;
+  const cx=cv.getContext('2d');const g=cx.createRadialGradient(32,32,0,32,32,32);
+  const rc=[(mColors[i%mColors.length]>>16)&255,(mColors[i%mColors.length]>>8)&255,mColors[i%mColors.length]&255];
+  g.addColorStop(0,`rgba(${rc[0]},${rc[1]},${rc[2]},1)`);g.addColorStop(1,`rgba(${rc[0]},${rc[1]},${rc[2]},0)`);
+  cx.fillStyle=g;cx.fillRect(0,0,64,64);
+  const tx=new THREE.CanvasTexture(cv);
+  const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,blending:THREE.AdditiveBlending,transparent:true,opacity:.25,depthWrite:false}));
+  const sx=((0-md.c/2)*md.sz+md.sz/2),sz=((0-md.r/2)*md.sz+md.sz/2);
+  gl.position.set(md.pos[0]+sx,md.pos[1]+md.wh/2+.4,md.pos[2]+sz);gl.scale.set(1.6,1.6,1);
+  scene.add(gl);
 });
 
-// ── Floating particle rings around mazes ──
-mazeData.forEach((md,i)=>{
-  const count=60;
-  const pos=new Float32Array(count*3);
-  for(let j=0;j<count;j++){
-    const a=j/count*Math.PI*2;
-    const r=2+Math.random()*1.5;
-    pos[j*3]=Math.cos(a)*r;
-    pos[j*3+1]=(Math.random()-.5)*.5;
-    pos[j*3+2]=Math.sin(a)*r;
-  }
-  const geo=new THREE.BufferGeometry();
-  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-  const mat=new THREE.PointsMaterial({
-    color:mazeColors[i%mazeColors.length],size:.06,transparent:true,opacity:.4,sizeAttenuation:true
-  });
-  const ring=new THREE.Points(geo,mat);
-  ring.position.copy(mesh.position);
-  ring.userData={orbit:i,phase:Math.random()*Math.PI*2};
-  scene.add(ring);
+// Floating particle rings
+mDatas.forEach((md,i)=>{
+  const pc=60,pa=new Float32Array(pc*3);
+  for(let j=0;j<pc;j++){const a=j/pc*Math.PI*2,r=2+Math.random()*1.5;pa[j*3]=Math.cos(a)*r;pa[j*3+1]=(Math.random()-.5)*.5;pa[j*3+2]=Math.sin(a)*r}
+  const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pa,3));
+  const pm=new THREE.PointsMaterial({color:mColors[i%mColors.length],size:.06,transparent:true,opacity:.4,sizeAttenuation:true});
+  const pr=new THREE.Points(pg,pm);pr.position.copy(mazes[i].position);pr.userData={ph:Math.random()*6.28};
+  scene.add(pr);
 });
 
-// ── Raycaster for click ──
-const raycaster=new THREE.Raycaster();
-const pointer=new THREE.Vector2();
-const label=document.getElementById('label');
-const ins=document.getElementById('ins');
-const hud=document.getElementById('hud');
-const mazeHud=document.getElementById('mazeHud');
-const ch=document.getElementById('ch');
-const mazeStat=document.getElementById('mazeStat');
-let hoveredMaze=null;
-let isInMaze=false;
-let mazeCamTarget=null;
-let mazeTransition=false;
-let mazePlayer=null;
+// Interaction
+const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
+let hovered=null,inMaze=false,trans=false,player=null,pLocked=false;
+const $lb=$('lb'),$ins=$('ins'),$hud=$('hud'),$mh=$('mh'),$ch=$('ch'),$ms=$('ms');
 
-function getMazeIntersects(event){
-  const rect=renderer.domElement.getBoundingClientRect();
-  pointer.x=((event.clientX-rect.left)/rect.width)*2-1;
-  pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
+function getHits(e){
+  const r=renderer.domElement.getBoundingClientRect();
+  pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;
   raycaster.setFromCamera(pointer,camera);
-  return raycaster.intersectObjects(mazeGroups,true);
+  return raycaster.intersectObjects(mazes,true);
 }
 
 renderer.domElement.addEventListener('pointermove',e=>{
-  if(isInMaze||mazeTransition)return;
-  const hits=getMazeIntersects(e);
+  if(inMaze||trans)return;
+  const hits=getHits(e);
   if(hits.length){
-    let obj=hits[0].object;
-    while(obj.parent&&!mazeGroups.includes(obj))obj=obj.parent;
-    if(mazeGroups.includes(obj)||obj.parent&&mazeGroups.includes(obj.parent)){
-      const maze=mazeGroups.includes(obj)?obj:obj.parent;
-      const md=mazeData[maze.userData.index];
-      label.textContent=`✦ ${md.cols}×${md.rows} maze · click to enter`;
-      label.classList.add('on');
-      renderer.domElement.style.cursor='pointer';
-      hoveredMaze=maze;
+    let o=hits[0].object;while(o.parent&&!mazes.includes(o))o=o.parent;
+    if(mazes.includes(o)||(o.parent&&mazes.includes(o.parent))){
+      const m=mazes.includes(o)?o:o.parent;
+      $lb.textContent='✦ '+m.userData.c+'×'+m.userData.r+' maze · click to enter';
+      $lb.classList.add('on');renderer.domElement.style.cursor='pointer';hovered=m;return;
     }
-  }else{
-    label.classList.remove('on');
-    renderer.domElement.style.cursor='default';
-    hoveredMaze=null;
   }
+  $lb.classList.remove('on');renderer.domElement.style.cursor='default';hovered=null;
 });
 
 renderer.domElement.addEventListener('click',e=>{
-  if(isInMaze||mazeTransition)return;
-  const hits=getMazeIntersects(e);
+  if(inMaze||trans)return;
+  if(document.pointerLockElement===renderer.domElement&&pLocked)return;
+  const hits=getHits(e);
   if(hits.length){
-    let obj=hits[0].object;
-    while(obj.parent&&!mazeGroups.includes(obj))obj=obj.parent;
-    if(mazeGroups.includes(obj)||obj.parent&&mazeGroups.includes(obj.parent)){
-      const maze=mazeGroups.includes(obj)?obj:obj.parent;
-      enterMaze(maze);
+    let o=hits[0].object;while(o.parent&&!mazes.includes(o))o=o.parent;
+    if(mazes.includes(o)||(o.parent&&mazes.includes(o.parent))){
+      enterMaze(mazes.includes(o)?o:o.parent);
     }
   }
 });
 
-// ── Enter Maze ──
 function enterMaze(maze){
-  isInMaze=true;mazeTransition=true;
-  const md=mazeData[maze.userData.index];
-  label.classList.remove('on');
-  ins.classList.add('hidden');
-  hud.classList.add('hidden');
-  mazeHud.classList.add('on');
-  ch.classList.add('on');
-  controls.enabled=false;
-  renderer.domElement.style.cursor='default';
-
-  // Position inside maze entrance
-  const exitX=0,exitZ=0; // entrance is at (0,0) in grid coords
-  const cx=((0-md.cols/2)*md.cellSize+md.cellSize/2);
-  const cz=((0-md.rows/2)*md.cellSize+md.cellSize/2);
-  const worldPos=new THREE.Vector3(
-    maze.position.x+cx,
-    maze.position.y+md.wallHeight*.35,
-    maze.position.z+cz+md.cellSize*.7
-  );
-
-  // Build collision grid
+  inMaze=true;trans=true;const md=maze.userData;
+  $lb.classList.remove('on');$ins.classList.add('hide');$hud.classList.add('hide');
+  $mh.classList.add('on');$ch.classList.add('on');
+  controls.enabled=false;renderer.domElement.style.cursor='default';
+  const cx=((0-md.c/2)*md.cs+md.cs/2),cz=((0-md.r/2)*md.cs+md.cs/2);
+  const wp=new THREE.Vector3(maze.position.x+cx,maze.position.y+md.wh*.35,maze.position.z+cz+md.cs*.7);
+  const sp=camera.position.clone(),st=controls.target.clone();
+  const dur=1200,st2=performance.now();
   const grid=maze.userData.grid;
-  const cols=md.cols,rows=md.rows;
-  const cs=md.cellSize;
-  const wallMap=[];
-  for(let r=0;r<rows;r++){wallMap[r]=[];for(let c=0;c<cols;c++)wallMap[r][c]=grid[r][c].walls}
+  player={pos:wp.clone(),yaw:0,pitch:0,grid,cs:md.cs,wh:md.wh,c:md.c,r:md.r,entered:Date.now()};
 
-  const player={
-    position:worldPos.clone(),yaw:0,pitch:0,
-    grid,cols,rows,cs,
-    wallMap,height:md.wallHeight*.35,
-    colRadius:.22,
-    enteredAt:Date.now()
-  };
-  mazePlayer=player;
-
-  // Lerp camera into maze
-  const startPos=camera.position.clone();
-  const startTarget=controls.target.clone();
-  const duration=1200;
-  const startTime=performance.now();
-
-  function transition(t){
-    const elapsed=t-startTime;
-    const prog=Math.min(1,elapsed/duration);
-    const ease=1-Math.pow(1-prog,3);
-    camera.position.lerpVectors(startPos,worldPos,ease);
-    controls.target.lerpVectors(startTarget,worldPos,ease);
-    if(prog<1)requestAnimationFrame(transition);
-    else{
-      mazeTransition=false;
-      mazeStat.textContent='🧭 exploring '+md.cols+'×'+md.rows+' maze';
-      // Pointer lock for FPS controls
-      renderer.domElement.requestPointerLock();
-    }
+  function t2(now){
+    const p2=Math.min(1,(now-st2)/dur),e2=1-Math.pow(1-p2,3);
+    camera.position.lerpVectors(sp,wp,e2);controls.target.lerpVectors(st,wp,e2);
+    if(p2<1)requestAnimationFrame(t2);
+    else{trans=false;$ms.textContent='🧭 exploring '+md.c+'×'+md.r+' maze';renderer.domElement.requestPointerLock()}
   }
-  requestAnimationFrame(transition);
+  requestAnimationFrame(t2);
 }
 
-// ── Exit Maze ──
 function exitMaze(){
-  if(!isInMaze||mazeTransition)return;
-  mazeTransition=true;
-  document.exitPointerLock();
-  const returnPos=new THREE.Vector3(0,5,18);
-  const startPos=camera.position.clone();
-  const startTarget=controls.target.clone();
-  const duration=1000;
-  const startTime=performance.now();
-
-  // Reset orbit target to origin
-  const endTarget=new THREE.Vector3(0,0,0);
-
-  function transition(t){
-    const elapsed=t-startTime;
-    const prog=Math.min(1,elapsed/duration);
-    const ease=1-Math.pow(1-prog,3);
-    camera.position.lerpVectors(startPos,returnPos,ease);
-    controls.target.lerpVectors(startTarget,endTarget,ease);
-    if(prog<1)requestAnimationFrame(transition);
-    else{
-      isInMaze=false;mazeTransition=false;mazePlayer=null;
-      controls.enabled=true;
-      ins.classList.remove('hidden');
-      hud.classList.remove('hidden');
-      mazeHud.classList.remove('on');
-      ch.classList.remove('on');
-    }
+  if(!inMaze||trans)return;
+  trans=true;document.exitPointerLock();
+  const sp=camera.position.clone(),st=controls.target.clone(),dur=1000,st2=performance.now();
+  const ep=new THREE.Vector3(0,5,18),et=new THREE.Vector3(0,0,0);
+  function t2(now){
+    const p2=Math.min(1,(now-st2)/dur),e2=1-Math.pow(1-p2,3);
+    camera.position.lerpVectors(sp,ep,e2);controls.target.lerpVectors(st,et,e2);
+    if(p2<1)requestAnimationFrame(t2);
+    else{inMaze=false;trans=false;player=null;controls.enabled=true;
+      $ins.classList.remove('hide');$hud.classList.remove('hide');$mh.classList.remove('on');$ch.classList.remove('on');pLocked=false}
   }
-  requestAnimationFrame(transition);
+  requestAnimationFrame(t2);
 }
+$('eb').addEventListener('click',exitMaze);
 
-document.getElementById('exitBtn').addEventListener('click',exitMaze);
+// FPS
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&inMaze)exitMaze()});
+document.addEventListener('mousemove',e=>{
+  if(!inMaze||trans||!player||document.pointerLockElement!==renderer.domElement)return;
+  pLocked=true;player.yaw-=e.movementX*.002;player.pitch=Math.max(-.8,Math.min(.8,player.pitch-e.movementY*.002));
+});
 
-// ── FPS Movement ──
+function moveP(){
+  if(!inMaze||trans||!player||document.pointerLockElement!==renderer.domElement)return;
+  const p=player;const fw=new THREE.Vector3(-Math.sin(p.yaw),0,-Math.cos(p.yaw));
+  const rt=new THREE.Vector3(Math.cos(p.yaw),0,-Math.sin(p.yaw));
+  const mv=new THREE.Vector3();
+  if(keys['w']||keys['arrowup'])mv.add(fw);if(keys['s']||keys['arrowdown'])mv.sub(fw);
+  if(keys['a']||keys['arrowleft'])mv.sub(rt);if(keys['d']||keys['arrowright'])mv.add(rt);
+  if(mv.length()>.01){
+    mv.normalize().multiplyScalar(.04);
+    const tp=p.pos.clone().add(mv);
+    // Simple bounds
+    const hw=p.c*p.cs/2-p.cs/2-.2,hd=p.r*p.cs/2-p.cs/2-.2;
+    tp.x=Math.max(-hw,Math.min(hw,tp.x));tp.z=Math.max(-hd,Math.min(hd,tp.z));
+    p.pos.copy(tp);
+    camera.position.copy(p.pos).add(new THREE.Vector3(0,.3,0));
+    const ld=new THREE.Vector3(-Math.sin(p.yaw)*Math.cos(p.pitch),Math.sin(p.pitch),-Math.cos(p.yaw)*Math.cos(p.pitch));
+    camera.lookAt(camera.position.clone().add(ld));controls.target.copy(p.pos);
+  }
+}
 const keys={};
-document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key==='Escape'&&isInMaze)exitMaze()});
+document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true});
 document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
 
-// Pointer lock movement
-document.addEventListener('mousemove',e=>{
-  if(!isInMaze||mazeTransition||!mazePlayer)return;
-  if(document.pointerLockElement!==renderer.domElement)return;
-  const sensitivity=.002;
-  mazePlayer.yaw-=e.movementX*sensitivity;
-  mazePlayer.pitch=Math.max(-.8,Math.min(.8,mazePlayer.pitch-e.movementY*sensitivity));
-});
+// Loaded
+document.getElementById('loading').classList.add('loaded');
+setTimeout(()=>document.getElementById('loading').style.display='none',800);
 
-function movePlayer(){
-  if(!isInMaze||mazeTransition||!mazePlayer||document.pointerLockElement!==renderer.domElement)return;
-  const p=mazePlayer;
-  const speed=.04;
-  const forward=new THREE.Vector3(-Math.sin(p.yaw),0,-Math.cos(p.yaw));
-  const right=new THREE.Vector3(Math.cos(p.yaw),0,-Math.sin(p.yaw));
-  const move=new THREE.Vector3();
-
-  if(keys['w']||keys['arrowup'])move.add(forward);
-  if(keys['s']||keys['arrowdown'])move.sub(forward);
-  if(keys['a']||keys['arrowleft'])move.sub(right);
-  if(keys['d']||keys['arrowright'])move.add(right);
-
-  if(move.length()>.01){
-    move.normalize().multiplyScalar(speed);
-    // Collision
-    const testPos=p.position.clone().add(move);
-    // Convert world to grid
-    const maze=mazeGroups.find(m=>{
-      const d=m.position.distanceTo(p.position);
-      return d<15;
-    });
-    if(maze){
-      const md=mazeData[maze.userData.index];
-      const dx=testPos.x-maze.position.x;
-      const dz=testPos.z-maze.position.z;
-      const c=Math.round((dx+md.cols*md.cs/2-md.cs/2)/md.cs);
-      const r=Math.round((dz+md.rows*md.cs/2-md.cs/2)/md.cs);
-      if(c>=0&&c<md.cols&&r>=0&&r<md.rows){
-        const half=md.cs/2-p.colRadius;
-        const cx2=(c-md.cols/2)*md.cs+md.cs/2;
-        const cz2=(r-md.rows/2)*md.cs+md.cs/2;
-        // Check walls
-        let blocked=false;
-        const wallMap=p.wallMap;
-
-        // Which cell is the player in?
-        const curC=Math.round((p.position.x-maze.position.x+md.cols*md.cs/2-md.cs/2)/md.cs);
-        const curR=Math.round((p.position.z-maze.position.z+md.rows*md.cs/2-md.cs/2)/md.cs);
-
-        // Check boundary walls
-        if(c!==curC){
-          const dir=c>curC?1:-1;
-          if(dir>0&&curC>=0&&curC<md.cols&&curR>=0&&curR<md.rows&&wallMap[curR][curC].e)blocked=true;
-          if(dir<0&&curC>=0&&curC<md.cols&&curR>=0&&curR<md.rows&&wallMap[curR][curC].w)blocked=true;
-        }
-        if(r!==curR){
-          const dir=r>curR?1:-1;
-          if(dir>0&&curC>=0&&curC<md.cols&&curR>=0&&curR<md.rows&&wallMap[curR][curC].s)blocked=true;
-          if(dir<0&&curC>=0&&curC<md.cols&&curR>=0&&curR<md.rows&&wallMap[curR][curC].n)blocked=true;
-        }
-
-        if(!blocked){
-          // Bounds check
-          const halfW=md.cols*md.cs/2-md.cs/2-p.colRadius;
-          const halfD=md.rows*md.cs/2-md.cs/2-p.colRadius;
-          testPos.x=Math.max(maze.position.x-halfW,Math.min(maze.position.x+halfW,testPos.x));
-          testPos.z=Math.max(maze.position.z-halfD,Math.min(maze.position.z+halfD,testPos.z));
-          p.position.copy(testPos);
-        }
-      }
-    }
-
-    // Camera follow
-    const eyeOffset=new THREE.Vector3(0,.3,0);
-    camera.position.copy(p.position).add(eyeOffset);
-    const lookDir=new THREE.Vector3(
-      -Math.sin(p.yaw)*Math.cos(p.pitch),
-      Math.sin(p.pitch),
-      -Math.cos(p.yaw)*Math.cos(p.pitch)
-    );
-    camera.lookAt(camera.position.clone().add(lookDir));
-    controls.target.copy(p.position);
-  }
-}
-
-// ── Animation ──
-function animate(t){
-  requestAnimationFrame(animate);
+// Animate
+function anim(t){
+  requestAnimationFrame(anim);
   const tt=t*.001;
-
-  // Rotate mazes slowly
-  mazeGroups.forEach((m,i)=>{
-    m.rotation.y+=.002*(.5+Math.sin(tt*.3+i)*.3);
-    m.position.y+=Math.sin(tt*.4+i*1.2)*.0008;
-  });
-
-  // Rotate stars
+  mazes.forEach((m,i)=>{m.rotation.y+=.002*(.5+Math.sin(tt*.3+i)*.3);m.position.y+=Math.sin(tt*.4+i*1.2)*.0008});
   stars.rotation.y+=.0001;
-
-  // Move player
-  movePlayer();
-
+  moveP();
   controls.update();
   renderer.render(scene,camera);
 }
+anim();
 
-animate();
+window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
 
-// ── Resize ──
-window.addEventListener('resize',()=>{
-  camera.aspect=window.innerWidth/window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth,window.innerHeight);
-});
-
-// ── Pointer lock change ──
 document.addEventListener('pointerlockchange',()=>{
-  if(document.pointerLockElement!==renderer.domElement&&isInMaze&&!mazeTransition){
-    // Lost lock but still in maze
-    mazeStat.textContent='🚪 click the maze to re-enter';
-  }
-});
-// Re-click to re-lock
-renderer.domElement.addEventListener('click',()=>{
-  if(isInMaze&&!mazeTransition&&document.pointerLockElement!==renderer.domElement){
-    renderer.domElement.requestPointerLock();
-    mazeStat.textContent='🧭 exploring';
-  }
+  if(document.pointerLockElement!==renderer.domElement&&inMaze&&!trans)$ms.textContent='🚪 click to re-enter';
 });
 
-console.log('🌌 Kulono Cosmic Maze — click any floating maze to enter');
+console.log('🌌 Kulono Cosmic Maze loaded');
+})();
 </script>
 </body>
 </html>
